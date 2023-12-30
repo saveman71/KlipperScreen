@@ -4,12 +4,12 @@ SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 KSPATH=$(sed 's/\/scripts//g' <<< $SCRIPTPATH)
 KSENV="${KLIPPERSCREEN_VENV:-${HOME}/.KlipperScreen-env}"
 
-XSERVER="xinit xinput x11-xserver-utils xserver-xorg-input-evdev xserver-xorg-input-libinput"
-FBDEV="xserver-xorg-video-fbdev"
-PYTHON="python3-virtualenv virtualenv python3-distutils"
-PYGOBJECT="libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0"
-MISC="librsvg2-common libopenjp2-7 wireless-tools libdbus-glib-1-dev autoconf"
-OPTIONAL="xserver-xorg-legacy fonts-nanum fonts-ipafont libmpv-dev policykit-1 network-manager"
+XSERVER="xinit xinput libx11 xf86-input-evdev xf86-input-libinput"
+FBDEV="xf86-video-fbdev"
+PYTHON="py3-virtualenv py3-distutils-extra"
+PYGOBJECT="gobject-introspection-dev cairo pkgconfig python3-dev gtk+3.0"
+MISC="librsvg-dev openjpeg dbus-glib-dev autoconf"
+# OPTIONAL="xserver-xorg-legacy fonts-nanum fonts-ipafont libmpv-dev policykit-1 network-manager"
 
 Red='\033[0;31m'
 Green='\033[0;32m'
@@ -34,54 +34,54 @@ echo_ok ()
 install_packages()
 {
     echo_text "Update package data"
-    sudo apt-get update
+    # sudo apt-get update
 
-    echo_text "Checking for broken packages..."
-    output=$(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' | grep -E ^.[^nci])
-    if [ $? -eq 0 ]; then
-        echo_text "Detected broken packages. Attempting to fix"
-        sudo apt-get -f install
-        output=$(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' | grep -E ^.[^nci])
-        if [ $? -eq 0 ]; then
-            echo_error "Unable to fix broken packages. These must be fixed before KlipperScreen can be installed"
-            exit 1
-        fi
-    else
-        echo_ok "No broken packages"
-    fi
+    # echo_text "Checking for broken packages..."
+    # output=$(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' | grep -E ^.[^nci])
+    # if [ $? -eq 0 ]; then
+    #     echo_text "Detected broken packages. Attempting to fix"
+    #     sudo apt-get -f install
+    #     output=$(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' | grep -E ^.[^nci])
+    #     if [ $? -eq 0 ]; then
+    #         echo_error "Unable to fix broken packages. These must be fixed before KlipperScreen can be installed"
+    #         exit 1
+    #     fi
+    # else
+    #     echo_ok "No broken packages"
+    # fi
 
     echo_text "Installing KlipperScreen dependencies"
-    sudo apt-get install -y $XSERVER
+    sudo apk add $XSERVER
     if [ $? -eq 0 ]; then
         echo_ok "Installed X"
     else
         echo_error "Installation of X-server dependencies failed ($XSERVER)"
         exit 1
     fi
-    sudo apt-get install -y $OPTIONAL
+    # sudo apk add $OPTIONAL
     echo $_
-    sudo apt-get install -y $FBDEV
+    sudo apk add $FBDEV
     if [ $? -eq 0 ]; then
         echo_ok "Installed FBdev"
     else
         echo_error "Installation of FBdev failed ($FBDEV)"
         exit 1
     fi
-    sudo apt-get install -y $PYTHON
+    sudo apk add $PYTHON
     if [ $? -eq 0 ]; then
         echo_ok "Installed Python dependencies"
     else
         echo_error "Installation of Python dependencies failed ($PYTHON)"
         exit 1
     fi
-    sudo apt-get install -y $PYGOBJECT
+    sudo apk add $PYGOBJECT
     if [ $? -eq 0 ]; then
         echo_ok "Installed PyGobject dependencies"
     else
         echo_error "Installation of PyGobject dependencies failed ($PYGOBJECT)"
         exit 1
     fi
-    sudo apt-get install -y $MISC
+    sudo apk add $MISC
     if [ $? -eq 0 ]; then
         echo_ok "Installed Misc packages"
     else
@@ -121,7 +121,7 @@ create_virtualenv()
     if [ $? -gt 0 ]; then
         echo_error "Error: pip install exited with status code $?"
         echo_text "Trying again with new tools..."
-        sudo apt-get install -y build-essential cmake
+        sudo apk add build-essential cmake
         pip install --upgrade pip setuptools
         pip install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
         if [ $? -gt 0 ]; then
