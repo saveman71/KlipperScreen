@@ -7,7 +7,7 @@ KSENV="${KLIPPERSCREEN_VENV:-${HOME}/.KlipperScreen-env}"
 XSERVER="xinit xinput libx11 xf86-input-evdev xf86-input-libinput"
 FBDEV="xf86-video-fbdev"
 PYTHON="py3-virtualenv py3-distutils-extra"
-PYGOBJECT="gobject-introspection-dev cairo pkgconfig python3-dev gtk+3.0"
+PYGOBJECT="gobject-introspection-dev gcc cairo pkgconfig python3-dev gtk+3.0"
 MISC="librsvg-dev openjpeg dbus-glib-dev autoconf"
 # OPTIONAL="xserver-xorg-legacy fonts-nanum fonts-ipafont libmpv-dev policykit-1 network-manager"
 
