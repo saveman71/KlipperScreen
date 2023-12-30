@@ -121,7 +121,7 @@ create_virtualenv()
     if [ $? -gt 0 ]; then
         echo_error "Error: pip install exited with status code $?"
         echo_text "Trying again with new tools..."
-        sudo apk add build-essential cmake
+        sudo apk add build-base
         pip install --upgrade pip setuptools
         pip install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
         if [ $? -gt 0 ]; then
