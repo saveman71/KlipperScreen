@@ -91,7 +91,7 @@ install_packages()
 #     ModemManager interferes with klipper comms
 #     on buster it's installed as a dependency of mpv
 #     it doesn't happen on bullseye
-    sudo systemctl mask ModemManager.service
+    # sudo systemctl mask ModemManager.service
 }
 
 check_requirements()
@@ -257,8 +257,8 @@ add_desktop_file()
 start_KlipperScreen()
 {
     echo_text "Starting service..."
-    sudo systemctl stop KlipperScreen
-    sudo systemctl start KlipperScreen
+    # sudo systemctl stop KlipperScreen
+    # sudo systemctl start KlipperScreen
 }
 if [ "$EUID" == 0 ]
     then echo_error "Please do not run this script as root"
