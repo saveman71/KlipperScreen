@@ -136,98 +136,101 @@ create_virtualenv()
 
 install_systemd_service()
 {
-    echo_text "Installing KlipperScreen unit file"
+    echo_text "skipping install_systemd_service"
+    # echo_text "Installing KlipperScreen unit file"
 
-    SERVICE=$(<$SCRIPTPATH/KlipperScreen.service)
-    KSPATH_ESC=$(sed "s/\//\\\\\//g" <<< $KSPATH)
-    KSENV_ESC=$(sed "s/\//\\\\\//g" <<< $KSENV)
+    # SERVICE=$(<$SCRIPTPATH/KlipperScreen.service)
+    # KSPATH_ESC=$(sed "s/\//\\\\\//g" <<< $KSPATH)
+    # KSENV_ESC=$(sed "s/\//\\\\\//g" <<< $KSENV)
 
-    SERVICE=$(sed "s/KS_USER/$USER/g" <<< $SERVICE)
-    SERVICE=$(sed "s/KS_ENV/$KSENV_ESC/g" <<< $SERVICE)
-    SERVICE=$(sed "s/KS_DIR/$KSPATH_ESC/g" <<< $SERVICE)
+    # SERVICE=$(sed "s/KS_USER/$USER/g" <<< $SERVICE)
+    # SERVICE=$(sed "s/KS_ENV/$KSENV_ESC/g" <<< $SERVICE)
+    # SERVICE=$(sed "s/KS_DIR/$KSPATH_ESC/g" <<< $SERVICE)
 
-    echo "$SERVICE" | sudo tee /etc/systemd/system/KlipperScreen.service > /dev/null
-    sudo systemctl unmask KlipperScreen.service
-    sudo systemctl daemon-reload
-    sudo systemctl enable KlipperScreen
+    # echo "$SERVICE" | sudo tee /etc/systemd/system/KlipperScreen.service > /dev/null
+    # sudo systemctl unmask KlipperScreen.service
+    # sudo systemctl daemon-reload
+    # sudo systemctl enable KlipperScreen
 }
 
 create_policy()
 {
-    POLKIT_DIR="/etc/polkit-1/rules.d"
-    POLKIT_USR_DIR="/usr/share/polkit-1/rules.d"
+    echo_text "skipping create_policy"
+#     POLKIT_DIR="/etc/polkit-1/rules.d"
+#     POLKIT_USR_DIR="/usr/share/polkit-1/rules.d"
 
-    echo_text "Installing KlipperScreen PolicyKit Rules"
-    sudo groupadd -f klipperscreen
-    sudo groupadd -f tty
-    if [ ! -x "$(command -v pkaction)" ]; then
-        echo "PolicyKit not installed"
-        return
-    fi
+#     echo_text "Installing KlipperScreen PolicyKit Rules"
+#     sudo groupadd -f klipperscreen
+#     sudo groupadd -f tty
+#     if [ ! -x "$(command -v pkaction)" ]; then
+#         echo "PolicyKit not installed"
+#         return
+#     fi
 
-    POLKIT_VERSION="$( pkaction --version | grep -Po "(\d+\.?\d*)" )"
-    echo_text "PolicyKit Version ${POLKIT_VERSION} Detected"
-    if [ "$POLKIT_VERSION" = "0.105" ]; then
-        # install legacy pkla
-        create_policy_legacy
-        return
-    fi
+#     POLKIT_VERSION="$( pkaction --version | grep -Po "(\d+\.?\d*)" )"
+#     echo_text "PolicyKit Version ${POLKIT_VERSION} Detected"
+#     if [ "$POLKIT_VERSION" = "0.105" ]; then
+#         # install legacy pkla
+#         create_policy_legacy
+#         return
+#     fi
 
-    RULE_FILE=""
-    if [ -d $POLKIT_USR_DIR ]; then
-        RULE_FILE="${POLKIT_USR_DIR}/KlipperScreen.rules"
-    elif [ -d $POLKIT_DIR ]; then
-        RULE_FILE="${POLKIT_DIR}/KlipperScreen.rules"
-    else
-        echo "PolicyKit rules folder not detected"
-        exit 1
-    fi
-    echo_text "Installing PolicyKit Rules to ${RULE_FILE}..."
+#     RULE_FILE=""
+#     if [ -d $POLKIT_USR_DIR ]; then
+#         RULE_FILE="${POLKIT_USR_DIR}/KlipperScreen.rules"
+#     elif [ -d $POLKIT_DIR ]; then
+#         RULE_FILE="${POLKIT_DIR}/KlipperScreen.rules"
+#     else
+#         echo "PolicyKit rules folder not detected"
+#         exit 1
+#     fi
+#     echo_text "Installing PolicyKit Rules to ${RULE_FILE}..."
 
-    KS_GID=$( getent group klipperscreen | awk -F: '{printf "%d", $3}' )
-    sudo /bin/sh -c "cat > ${RULE_FILE}" << EOF
-// Allow KlipperScreen to reboot, shutdown, etc
-polkit.addRule(function(action, subject) {
-    if ((action.id == "org.freedesktop.login1.power-off" ||
-         action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
-         action.id == "org.freedesktop.login1.reboot" ||
-         action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
-         action.id == "org.freedesktop.login1.halt" ||
-         action.id == "org.freedesktop.login1.halt-multiple-sessions" ||
-         action.id == "org.freedesktop.NetworkManager.wifi.scan" ||
-         action.id.startsWith("org.freedesktop.packagekit.")) &&
-        subject.user == "$USER") {
-        // Only allow processes with the "klipperscreen" supplementary group
-        // access
-        var regex = "^Groups:.+?\\\s$KS_GID[\\\s\\\0]";
-        var cmdpath = "/proc/" + subject.pid.toString() + "/status";
-        try {
-            polkit.spawn(["grep", "-Po", regex, cmdpath]);
-            return polkit.Result.YES;
-        } catch (error) {
-            return polkit.Result.NOT_HANDLED;
-        }
-    }
-});
-EOF
+#     KS_GID=$( getent group klipperscreen | awk -F: '{printf "%d", $3}' )
+#     sudo /bin/sh -c "cat > ${RULE_FILE}" << EOF
+# // Allow KlipperScreen to reboot, shutdown, etc
+# polkit.addRule(function(action, subject) {
+#     if ((action.id == "org.freedesktop.login1.power-off" ||
+#          action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
+#          action.id == "org.freedesktop.login1.reboot" ||
+#          action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+#          action.id == "org.freedesktop.login1.halt" ||
+#          action.id == "org.freedesktop.login1.halt-multiple-sessions" ||
+#          action.id == "org.freedesktop.NetworkManager.wifi.scan" ||
+#          action.id.startsWith("org.freedesktop.packagekit.")) &&
+#         subject.user == "$USER") {
+#         // Only allow processes with the "klipperscreen" supplementary group
+#         // access
+#         var regex = "^Groups:.+?\\\s$KS_GID[\\\s\\\0]";
+#         var cmdpath = "/proc/" + subject.pid.toString() + "/status";
+#         try {
+#             polkit.spawn(["grep", "-Po", regex, cmdpath]);
+#             return polkit.Result.YES;
+#         } catch (error) {
+#             return polkit.Result.NOT_HANDLED;
+#         }
+#     }
+# });
+# EOF
 }
 
 create_policy_legacy()
 {
-    RULE_FILE="/etc/polkit-1/localauthority/50-local.d/20-klipperscreen.pkla"
-    ACTIONS="org.freedesktop.login1.power-off"
-    ACTIONS="${ACTIONS};org.freedesktop.login1.power-off-multiple-sessions"
-    ACTIONS="${ACTIONS};org.freedesktop.login1.reboot"
-    ACTIONS="${ACTIONS};org.freedesktop.login1.reboot-multiple-sessions"
-    ACTIONS="${ACTIONS};org.freedesktop.login1.halt"
-    ACTIONS="${ACTIONS};org.freedesktop.login1.halt-multiple-sessions"
-    ACTIONS="${ACTIONS};org.freedesktop.NetworkManager.wifi.scan"
-    sudo /bin/sh -c "cat > ${RULE_FILE}" << EOF
-[KlipperScreen]
-Identity=unix-user:$USER
-Action=$ACTIONS
-ResultAny=yes
-EOF
+    echo_text "skipping create_policy_legacy"
+#     RULE_FILE="/etc/polkit-1/localauthority/50-local.d/20-klipperscreen.pkla"
+#     ACTIONS="org.freedesktop.login1.power-off"
+#     ACTIONS="${ACTIONS};org.freedesktop.login1.power-off-multiple-sessions"
+#     ACTIONS="${ACTIONS};org.freedesktop.login1.reboot"
+#     ACTIONS="${ACTIONS};org.freedesktop.login1.reboot-multiple-sessions"
+#     ACTIONS="${ACTIONS};org.freedesktop.login1.halt"
+#     ACTIONS="${ACTIONS};org.freedesktop.login1.halt-multiple-sessions"
+#     ACTIONS="${ACTIONS};org.freedesktop.NetworkManager.wifi.scan"
+#     sudo /bin/sh -c "cat > ${RULE_FILE}" << EOF
+# [KlipperScreen]
+# Identity=unix-user:$USER
+# Action=$ACTIONS
+# ResultAny=yes
+# EOF
 }
 
 update_x11()
@@ -244,10 +247,11 @@ update_x11()
 
 add_desktop_file()
 {
-    DESKTOP=$(<$SCRIPTPATH/KlipperScreen.desktop)
-    mkdir -p $HOME/.local/share/applications/
-    echo "$DESKTOP" | tee $HOME/.local/share/applications/KlipperScreen.desktop > /dev/null
-    sudo cp $SCRIPTPATH/../styles/icon.svg /usr/share/icons/hicolor/scalable/apps/KlipperScreen.svg
+    echo_text "skipping add_desktop_file"
+    # DESKTOP=$(<$SCRIPTPATH/KlipperScreen.desktop)
+    # mkdir -p $HOME/.local/share/applications/
+    # echo "$DESKTOP" | tee $HOME/.local/share/applications/KlipperScreen.desktop > /dev/null
+    # sudo cp $SCRIPTPATH/../styles/icon.svg /usr/share/icons/hicolor/scalable/apps/KlipperScreen.svg
 }
 
 start_KlipperScreen()
